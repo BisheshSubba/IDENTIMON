@@ -8,6 +8,10 @@ import io
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import JsonResponse
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+model_path = os.path.join(BASE_DIR, 'predict', 'animals_resnet34.pth')
+
 
 transform = transforms.Compose([
     transforms.Resize((224,224)),
@@ -15,8 +19,6 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225]),
 ])
-
-model_path = r"C:\Users\swastik limbu\Desktop\ML Project\identimon\predict\animals_resnet34.pth"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = models.resnet34(weights=None)
