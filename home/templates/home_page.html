@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identimon - Animal Identifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/2fb2821a-1406-4a1d-9b04-6668f278e944/de2solr-d0756bff-3418-4364-ba91-6127435ce981.jpg/v1/fill/w_1192,h_670,q_70,strp/pokemon_swsh___wild_area__sunset__by_phoenixoflight92_de2solr-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NzIwIiwicGF0aCI6Ii9mLzJmYjI4MjFhLTE0MDYtNGExZC05YjA0LTY2NjhmMjc4ZTk0NC9kZTJzb2xyLWQwNzU2YmZmLTM0MTgtNDM2NC1iYTkxLTYxMjc0MzVjZTk4MS5qcGciLCJ3aWR0aCI6Ijw9MTI4MCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.TN0cnBqWzV9GeYtyq84b8vRChk0YJ6PSWP5NhxDwbj8') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .pokedex-container {
+            width: 1000px;
+            height: 700px;
+            background: linear-gradient(135deg, #e71d1d 0%, #a10d0d 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 8px solid #333;
+            position: relative;
+            display: flex;
+        }
+
+        .pokedex-left {
+            width: 60%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .pokedex-right {
+            width: 40%;
+            background: #e71d1d;
+            border-left: 5px solid #333;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .screen {
+            background: linear-gradient(135deg, #8bc8ff 0%, #5aa9ff 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 5px solid #333;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title-section img {
+            max-width: 80%;
+            height: auto;
+            filter: drop-shadow(3px 3px 0 #FFD700) drop-shadow(5px 5px 0 rgba(0,0,0,0.1));
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 3px dashed #333;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #FFD700;
+            background: rgba(255, 249, 196, 0.7);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .image-display {
+            width: 100%;
+            height: 250px;
+            border-radius: 10px;
+            margin: 10px auto;
+            display: none;
+            border: 3px solid #333;
+            overflow: hidden;
+            background: white;
+        }
+
+        .image-display.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .image-display img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            border: 3px solid #FFD700;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
+        }
+
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border-color: #95a5a6;
+        }
+
+        .result-screen {
+            background: linear-gradient(135deg, #8bc8ff 0%, #5aa9ff 100%);
+            border-radius: 15px;
+            padding: 20px;
+            border: 5px solid #333;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            flex-grow: 1;
+            display: none;
+            flex-direction: column;
+            min-height: 500px;
+        }
+
+        .result-screen.show {
+            display: flex;
+            animation: slideUp 0.5s ease;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: #2d3436;
+            font-weight: 700;
+        }
+
+        .result-id {
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .result-content {
+            display: flex;
+            flex-grow: 1;
+            gap: 15px;
+            flex-direction: column;
+        }
+
+        .result-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            border: 3px solid #333;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .result-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .result-details {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .animal-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e17055;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .animal-type {
+            background: #FFD700;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+
+        .fun-fact {
+            font-size: 1rem;
+            color: #2d3436;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            flex-grow: 1;
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-name {
+            font-weight: bold;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 15px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+            border: 2px solid #2E7D32;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #2E7D32);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .pokeball-loading {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            border: 5px solid #333;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            animation: spin 1s linear infinite;
+        }
+
+        .pokeball-loading::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #333;
+            transform: translateY(-50%);
+        }
+
+        .pokeball-loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 5px solid #333;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .pokedex-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #333;
+            border: 3px solid #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        .pokedex-button:hover {
+            transform: scale(1.1);
+        }
+
+        .pokedex-button:active {
+            transform: scale(0.95);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1050px) {
+            .pokedex-container {
+                width: 95%;
+                height: auto;
+                min-height: 700px;
+                flex-direction: column;
+            }
+            
+            .pokedex-left, .pokedex-right {
+                width: 100%;
+                min-height: 400px;
+            }
+            
+            .pokedex-right {
+                border-left: none;
+                border-top: 5px solid #333;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pokedex-container">
+        <div class="pokedex-left">
+            <div class="screen">
+                <div class="title-section">
+                    <a href="https://fontmeme.com/pokemon-font/"><img src="https://fontmeme.com/permalink/251019/d7441cb5b6e9d123e2a541789eb3164a.png" alt="pokemon-font" border="0"></a>
+                    <div class="subtitle">AI-Powered Animal Identifier</div>
+                </div>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">🐾</div>
+                    <div class="upload-text">Drag & Drop your image here</div>
+                    <div class="upload-hint">or click to browse files</div>
+                    <input type="file" name="image" id="fileInput" accept="image/*">
+                </div>
+
+                <div class="image-display" id="imageDisplay">
+                    <!-- Selected image will be displayed here -->
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                    🎯 Identify Animal
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="pokeball-loading"></div>
+                    <p>Analyzing your image with Poké-Tech...</p>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="pokedex-button" onclick="resetForm()">↺</div>
+            </div>
+        </div>
+        
+        <div class="pokedex-right">
+            <div class="result-screen" id="resultScreen">
+                <div class="result-header">
+                    <div class="result-title">IDENTIFICATION RESULT</div>
+                    <div class="result-id">#001</div>
+                </div>
+                
+                <div class="result-content">
+                    <div class="result-image" id="resultImage">
+                        <!-- Image will be inserted here -->
+                    </div>
+                    
+                    <div class="result-details">
+                        <div class="animal-name" id="animalName"></div>
+                        <div class="animal-type" id="animalType">NORMAL TYPE</div>
+                        <div class="fun-fact" id="funFact"></div>
+                        
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="stat-name">IDENTIFICATION ACCURACY:</span>
+                                <span id="confidenceValue">0%</span>
+                            </div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Animal fun facts database
+        const animalFacts = {
+            'dog': [
+                "Dogs have a sense of smell that's 10,000 to 100,000 times more acute than humans!",
+                "A dog's nose print is unique, much like a human's fingerprint.",
+                "The Basenji dog is known as the 'barkless dog' because it makes a yodel-like sound instead of barking."
+            ],
+            'horse': [
+                "Horses can sleep both lying down and standing up thanks to a 'stay apparatus' in their legs.",
+                "A horse's teeth take up more space in their head than their brain.",
+                "Horses have the largest eyes of any land mammal and can see nearly 360 degrees at once."
+            ],
+            'elephant': [
+                "Elephants can recognize themselves in mirrors, showing self-awareness - a trait shared with humans, apes, and dolphins.",
+                "An elephant's trunk has over 40,000 muscles and can lift up to 770 pounds!",
+                "Elephants communicate using infrasound, which is too low for humans to hear, over distances up to 6 miles."
+            ],
+            'butterfly': [
+                "Butterflies taste with their feet! They have taste receptors on their tarsi to identify plants.",
+                "Some butterflies can reach speeds of up to 30 miles per hour when flying.",
+                "Butterflies see more colors than humans, including ultraviolet light which helps them find nectar."
+            ],
+            'chicken': [
+                "Chickens have over 30 distinct vocalizations to communicate different messages to each other.",
+                "A mother hen begins teaching calls to her chicks while they're still in the egg.",
+                "Chickens can remember over 100 different faces of people or animals and have shown self-control in studies."
+            ],
+            'cat': [
+                "Cats have a special reflective layer behind their retinas called the tapetum lucidum, which makes their eyes glow in the dark.",
+                "A cat's purr vibrates at a frequency of 25-150 Hz, which can promote healing of bones and tissues.",
+                "Cats can rotate their ears 180 degrees and can hear sounds too faint or too high in frequency for human ears."
+            ],
+            'cow': [
+                "Cows have best friends and get stressed when they're separated from them.",
+                "Cows have nearly 360-degree panoramic vision, allowing them to watch for predators from all angles.",
+                "A cow's mood can be determined by how much of its ear is showing - more visible ear means they're relaxed."
+            ],
+            'sheep': [
+                "Sheep have rectangular pupils that give them a wide field of vision - about 270 to 320 degrees!",
+                "Sheep can recognize up to 50 other sheep faces and remember them for years.",
+                "A flock of sheep is called a mob, and a baby sheep is called a lamb until it's one year old."
+            ],
+            'spider': [
+                "Some spiders can 'balloon' by releasing silk threads to catch the wind and travel long distances.",
+                "Spider silk is stronger than steel of the same thickness and more elastic than nylon.",
+                "Not all spiders build webs - some are active hunters that chase down their prey."
+            ],
+            'squirrel': [
+                "Squirrels plant thousands of new trees each year simply by forgetting where they buried their acorns.",
+                "A squirrel's front teeth never stop growing - they grow about 6 inches a year but get worn down by gnawing.",
+                "Squirrels use their tails as umbrellas in the rain and as blankets when sleeping."
+            ],
+            'moth': [
+                "Some moths have evolved to look like bees or wasps as a defense mechanism against predators.",
+                "Moths are important pollinators, especially for flowers that bloom at night.",
+                "The Luna moth has no mouth and doesn't eat - it lives for only about a week to reproduce."
+            ]
+        };
+
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imageDisplay = document.getElementById('imageDisplay');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const resultScreen = document.getElementById('resultScreen');
+        const animalName = document.getElementById('animalName');
+        const funFact = document.getElementById('funFact');
+        const confidenceFill = document.getElementById('confidenceFill');
+        const confidenceValue = document.getElementById('confidenceValue');
+        const resultImage = document.getElementById('resultImage');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelection(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            // Hide upload area and show image display
+            uploadArea.classList.add('hidden');
+            imageDisplay.classList.add('show');
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageDisplay.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+                
+                // Store the image for later use in results
+                resultImage.innerHTML = `<img src="${e.target.result}" alt="Identified Animal" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+            };
+            reader.readAsDataURL(file);
+
+            submitBtn.disabled = false;
+        }
+
+        // Get a random fun fact for an animal
+        function getRandomFunFact(animal) {
+            const animalKey = animal.toLowerCase();
+            if (animalFacts[animalKey]) {
+                const facts = animalFacts[animalKey];
+                return facts[Math.floor(Math.random() * facts.length)];
+            }
+            return "This animal is full of surprises! Keep exploring to learn more about it.";
+        }
+
+        // Form submission handler
+        document.getElementById('submitBtn').addEventListener('click', async function(e){
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Show loading, hide upload elements
+            loading.classList.add('show');
+            submitBtn.classList.add('hidden');
+            resultScreen.classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const csrftoken = getCookie('csrftoken');
+                const response = await fetch('/api/predict/', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    body: formData,
+                });
+                
+                if (!response.ok){
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Hide loading, show results
+                loading.classList.remove('show');
+                
+                // Display results
+                animalName.textContent = data.predicted_class;
+                const confidence = data.confidence_percent;
+                confidenceFill.style.width = `${confidence}%`;
+                confidenceValue.textContent = `${confidence}%`;
+                
+                // Display a random fun fact
+                funFact.textContent = getRandomFunFact(data.predicted_class);
+                
+                // Show the result screen
+                resultScreen.classList.add('show');
+
+            } catch (error) {
+                console.error('Prediction failed:', error);
+                loading.classList.remove('show');
+                animalName.textContent = 'Prediction Failed!';
+                confidenceValue.textContent = '0%';
+                confidenceFill.style.width = '0%';
+                funFact.textContent = "Even the best Pokédex has trouble sometimes! Please try again.";
+                resultScreen.classList.add('show');
+            }
+        });
+
+        function resetForm() {
+            fileInput.value = '';
+            imageDisplay.classList.remove('show');
+            imageDisplay.innerHTML = '';
+            submitBtn.disabled = true;
+            resultScreen.classList.remove('show');
+            
+            // Show upload elements again
+            uploadArea.classList.remove('hidden');
+            submitBtn.classList.remove('hidden');
+            loading.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
